@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slack プロフィール画像フレーム合成</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: #4A154B; /* Slackのブランドカラー */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .upload-container {
+            width: 100%;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .preview-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .preview-box {
+            text-align: center;
+        }
+        canvas {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #4A154B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #611f69;
+        }
+        .instructions {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 5px solid #4A154B;
+        }
+    </style>
+</head>
+<body>
+    <h1>Slack プロフィール画像フレーム合成</h1>
+    
+    <div class="container">
+        <div class="upload-container">
+            <p>Slackのプロフィール画像をアップロードしてください</p>
+            <input type="file" id="imageUpload" accept="image/*">
+        </div>
+        
+        <div class="preview-container">
+            <div class="preview-box">
+                <h3>元の画像</h3>
+                <canvas id="originalCanvas" width="500" height="500"></canvas>
+            </div>
+            <div class="preview-box">
+                <h3>合成後の画像</h3>
+                <canvas id="compositeCanvas" width="500" height="500"></canvas>
+            </div>
+        </div>
+        
+        <button id="downloadBtn" disabled>合成画像をダウンロード</button>
+        
+        <div class="instructions">
+            <h3>使い方</h3>
+            <ol>
+                <li>「ファイルを選択」ボタンをクリックして、Slackのプロフィール画像を選択</li>
+                <li>画像が自動的に合成されます</li>
+                <li>「合成画像をダウンロード」ボタンをクリックして保存</li>
+                <li>保存した画像をSlackのプロフィールにアップロード</li>
+            </ol>
+            <p><strong>注意：</strong> 画像処理はすべてブラウザ上で行われます。画像データはサーバーに送信されません。</p>
+        </div>
+    </div>
+
+    <script>
+        let frameImage = new Image();
+        frameImage.src = 'frame.png'; // フレーム画像のパス
+        frameImage.onload = function() {
+            console.log('フレーム画像が読み込まれました');
+        };
+
+        const imageUpload = document.getElementById('imageUpload');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const compositeCanvas = document.getElementById('compositeCanvas');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        const originalCtx = originalCanvas.getContext('2d');
+        const compositeCtx = compositeCanvas.getContext('2d');
+        
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // 元の画像をキャンバスに描画
+                    originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+                    originalCtx.drawImage(img, 0, 0, originalCanvas.width, originalCanvas.height);
+                    
+                    // 合成画像を作成
+                    compositeCtx.clearRect(0, 0, compositeCanvas.width, compositeCanvas.height);
+                    compositeCtx.drawImage(img, 0, 0, compositeCanvas.width, compositeCanvas.height);
+                    compositeCtx.drawImage(frameImage, 0, 0, compositeCanvas.width, compositeCanvas.height);
+                    
+                    // ダウンロードボタンを有効化
+                    downloadBtn.disabled = false;
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        downloadBtn.addEventListener('click', function() {
+            const link = document.createElement('a');
+            link.download = 'slack-profile-with-frame.png';
+            link.href = compositeCanvas.toDataURL('image/png');
+            link.click();
+        });
+    </script>
+</body>
+</html>
