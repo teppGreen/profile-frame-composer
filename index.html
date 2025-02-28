@@ -11,10 +11,10 @@
     <style>
         :root {
             --primary-color: #1f286f;    /* 濃紺 - 主要テキストや見出し */
-            --accent-color: #d62525;     /* 赤 - アクセントカラー、重要な注意書き */
-            --highlight-color: #ffd800;  /* 黄色 - ハイライト、ボタンホバー */
+            --accent-color: #d62525;     /* 赤 - アクセントカラー、ボタン */
+            --highlight-color: #ffd800;  /* 黄色 - ハイライト */
             --background-color: #f0f3f8; /* 薄い青灰色 - 背景色 */
-            --white-color: #ffffff;      /* 白 - コンテンツ背景、ボタンテキスト */
+            --white-color: #ffffff;      /* 白 - コンテンツ背景、ボタンホバーテキスト */
         }
         
         body {
@@ -66,10 +66,9 @@
         
         .preview-container {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             width: 100%;
             margin-bottom: 20px;
-            flex-wrap: wrap;
         }
         
         .preview-box {
@@ -89,9 +88,9 @@
         }
         
         button {
-            background-color: var(--primary-color);
+            background-color: var(--accent-color);
             color: var(--white-color);
-            border: none;
+            border: 2px solid var(--accent-color);
             padding: 12px 24px;
             border-radius: 5px;
             cursor: pointer;
@@ -104,15 +103,22 @@
         }
         
         button:hover {
-            background-color: var(--accent-color);
-            transform: translateY(-2px);
+            background-color: var(--white-color);
+            color: var(--accent-color);
         }
         
         button:disabled {
             background-color: #cccccc;
+            color: #666666;
+            border-color: #cccccc;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+        
+        button:disabled:hover {
+            background-color: #cccccc;
+            color: #666666;
         }
         
         .instructions, .slack-instructions {
@@ -161,76 +167,119 @@
         ol li {
             margin-bottom: 8px;
         }
+        
+        .access-denied {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: var(--white-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .access-denied h2 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+        
+        #app-content, #access-denied {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <h1>Slack プロフィール画像フレーム合成</h1>
+    <!-- アクセス制限画面 -->
+    <div id="access-denied" class="access-denied">
+        <h2>このページはアクセスが制限されています</h2>
+        <p>正規のURLからアクセスしてください。</p>
+    </div>
     
-    <div class="container">
-        <div class="upload-container">
-            <p>Slackのプロフィール画像をアップロードしてください</p>
-            <input type="file" id="imageUpload" accept="image/*">
-            <p class="size-note">※出力サイズ: <span class="size-number">512×512</span> ピクセル</p>
-        </div>
+    <!-- アプリケーション本体 -->
+    <div id="app-content">
+        <h1>Slack プロフィール画像フレーム合成</h1>
         
-        <div class="preview-container">
-            <div class="preview-box">
-                <h3 class="section-title">元の画像</h3>
-                <canvas id="originalCanvas" width="512" height="512"></canvas>
+        <div class="container">
+            <div class="upload-container">
+                <p>Slackのプロフィール画像をアップロードしてください</p>
+                <input type="file" id="imageUpload" accept="image/*">
+                <p class="size-note">※出力サイズ: <span class="size-number">512×512</span> ピクセル</p>
             </div>
-            <div class="preview-box">
-                <h3 class="section-title">合成後の画像</h3>
-                <canvas id="compositeCanvas" width="512" height="512"></canvas>
+            
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3 class="section-title">合成後の画像</h3>
+                    <canvas id="compositeCanvas" width="512" height="512"></canvas>
+                </div>
             </div>
-        </div>
-        
-        <button id="downloadBtn" disabled>合成画像をダウンロード</button>
-        
-        <div class="instructions">
-            <h3 class="section-title">使い方</h3>
-            <ol>
-                <li>「ファイルを選択」ボタンをクリックして、Slackのプロフィール画像を選択</li>
-                <li>画像が自動的に合成されます</li>
-                <li>「合成画像をダウンロード」ボタンをクリックして保存</li>
-                <li>保存した画像をSlackのプロフィールにアップロード</li>
-            </ol>
-            <p><strong>注意：</strong> 画像処理はすべてブラウザ上で行われます。画像データはサーバーに送信されません。</p>
-        </div>
-        
-        <div class="slack-instructions">
-            <h3 class="section-title">Slackでプロフィール画像を変更する方法</h3>
             
-            <h4>デスクトップアプリ/ブラウザ版：</h4>
-            <ol>
-                <li>Slackにログインする</li>
-                <li>画面左上の自分のプロフィール写真（アイコン）をクリック</li>
-                <li>表示されるメニューから「プロフィールを編集」を選択</li>
-                <li>プロフィール編集画面で「プロフィール写真を変更」をクリック</li>
-                <li>先ほどダウンロードした合成画像を選択してアップロード</li>
-            </ol>
+            <button id="downloadBtn" disabled>合成画像をダウンロード</button>
             
-            <h4>モバイルアプリ：</h4>
-            <ol>
-                <li>Slackアプリを開く</li>
-                <li>画面右下の「あなた」タブをタップ</li>
-                <li>プロフィール画面の自分のアイコンをタップ</li>
-                <li>「編集」をタップしてプロフィール設定を開く</li>
-                <li>プロフィール写真を変更し、先ほどダウンロードした合成画像を選択</li>
-            </ol>
+            <div class="instructions">
+                <h3 class="section-title">使い方</h3>
+                <ol>
+                    <li>「ファイルを選択」ボタンをクリックして、Slackのプロフィール画像を選択</li>
+                    <li>画像が自動的に合成されます</li>
+                    <li>「合成画像をダウンロード」ボタンをクリックして保存</li>
+                    <li>保存した画像をSlackのプロフィールにアップロード</li>
+                </ol>
+                <p><strong>注意：</strong> 画像処理はすべてブラウザ上で行われます。画像データはサーバーに送信されません。</p>
+            </div>
+            
+            <div class="slack-instructions">
+                <h3 class="section-title">Slackでプロフィール画像を変更する方法</h3>
+                
+                <h4>デスクトップアプリ/ブラウザ版：</h4>
+                <ol>
+                    <li>Slackにログインする</li>
+                    <li>画面左上の自分のプロフィール写真（アイコン）をクリック</li>
+                    <li>表示されるメニューから「プロフィールを編集」を選択</li>
+                    <li>プロフィール編集画面で「プロフィール写真を変更」をクリック</li>
+                    <li>先ほどダウンロードした合成画像を選択してアップロード</li>
+                </ol>
+                
+                <h4>モバイルアプリ：</h4>
+                <ol>
+                    <li>Slackアプリを開く</li>
+                    <li>画面右下の「あなた」タブをタップ</li>
+                    <li>プロフィール画面の自分のアイコンをタップ</li>
+                    <li>「編集」をタップしてプロフィール設定を開く</li>
+                    <li>プロフィール写真を変更し、先ほどダウンロードした合成画像を選択</li>
+                </ol>
+            </div>
         </div>
     </div>
 
     <script>
+        // URLパラメータのチェック
+        function checkAccess() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const accessKey = urlParams.get('key');
+            
+            // アクセスキー「frame2024」の場合にのみアクセス許可
+            if (accessKey === 'frame2024') {
+                document.getElementById('app-content').style.display = 'block';
+                document.getElementById('access-denied').style.display = 'none';
+            } else {
+                document.getElementById('app-content').style.display = 'none';
+                document.getElementById('access-denied').style.display = 'block';
+            }
+        }
+        
+        // ページ読み込み時にアクセスチェック
+        window.onload = checkAccess;
+        
+        // フレーム画像の読み込み
         let frameImage = new Image();
         frameImage.src = 'frame.png'; // フレーム画像のパス
-        frameImage.onload = function() {
-            console.log('フレーム画像が読み込まれました');
-        };
-
+        
+        // キャンバスと入力要素の取得
         const imageUpload = document.getElementById('imageUpload');
-        const originalCanvas = document.getElementById('originalCanvas');
         const compositeCanvas = document.getElementById('compositeCanvas');
         const downloadBtn = document.getElementById('downloadBtn');
+        
+        // 元画像のキャンバスは作成するが表示しない
+        const originalCanvas = document.createElement('canvas');
+        originalCanvas.width = 512;
+        originalCanvas.height = 512;
         
         const originalCtx = originalCanvas.getContext('2d');
         const compositeCtx = compositeCanvas.getContext('2d');
@@ -243,7 +292,7 @@
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
-                    // 元の画像をキャンバスに描画
+                    // 元の画像をキャンバスに描画（非表示）
                     originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
                     originalCtx.drawImage(img, 0, 0, originalCanvas.width, originalCanvas.height);
                     
