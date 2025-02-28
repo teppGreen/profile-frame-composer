@@ -4,64 +4,162 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Slack プロフィール画像フレーム合成</title>
+    <!-- Google Fontsの読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #1f286f;    /* 濃紺 - 主要テキストや見出し */
+            --accent-color: #d62525;     /* 赤 - アクセントカラー、重要な注意書き */
+            --highlight-color: #ffd800;  /* 黄色 - ハイライト、ボタンホバー */
+            --background-color: #f0f3f8; /* 薄い青灰色 - 背景色 */
+            --white-color: #ffffff;      /* 白 - コンテンツ背景、ボタンテキスト */
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Noto Sans JP', sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--primary-color);
         }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Noto Sans JP', sans-serif;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        .number, .english {
+            font-family: 'Roboto', sans-serif;
+        }
+        
         h1 {
             text-align: center;
-            color: #4A154B; /* Slackのブランドカラー */
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--accent-color);
         }
+        
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            background-color: var(--white-color);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        
         .upload-container {
             width: 100%;
-            border: 2px dashed #ccc;
+            border: 2px dashed var(--primary-color);
             padding: 20px;
             text-align: center;
             margin-bottom: 20px;
-            border-radius: 5px;
+            border-radius: 8px;
+            background-color: rgba(31, 40, 111, 0.05);
         }
+        
         .preview-container {
             display: flex;
             justify-content: space-around;
             width: 100%;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
+        
         .preview-box {
             text-align: center;
+            margin: 10px;
+            background-color: var(--white-color);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+        
         canvas {
             max-width: 100%;
-            border: 1px solid #ddd;
+            border: 2px solid var(--primary-color);
             margin-top: 10px;
+            border-radius: 4px;
         }
+        
         button {
-            background-color: #4A154B;
-            color: white;
+            background-color: var(--primary-color);
+            color: var(--white-color);
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
             margin-top: 10px;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
+        
         button:hover {
-            background-color: #611f69;
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
         }
-        .instructions {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .instructions, .slack-instructions {
+            background-color: var(--white-color);
+            padding: 20px;
+            border-radius: 8px;
             margin-top: 20px;
-            border-left: 5px solid #4A154B;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions {
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .slack-instructions {
+            border-left: 5px solid var(--accent-color);
+        }
+        
+        .size-note {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-top: 15px;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        
+        .size-number {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+        }
+        
+        input[type="file"] {
+            background-color: var(--white-color);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 100%;
+        }
+        
+        .section-title {
+            border-bottom: 2px solid var(--highlight-color);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        ol li {
+            margin-bottom: 8px;
         }
     </style>
 </head>
@@ -72,23 +170,24 @@
         <div class="upload-container">
             <p>Slackのプロフィール画像をアップロードしてください</p>
             <input type="file" id="imageUpload" accept="image/*">
+            <p class="size-note">※出力サイズ: <span class="size-number">512×512</span> ピクセル</p>
         </div>
         
         <div class="preview-container">
             <div class="preview-box">
-                <h3>元の画像</h3>
-                <canvas id="originalCanvas" width="500" height="500"></canvas>
+                <h3 class="section-title">元の画像</h3>
+                <canvas id="originalCanvas" width="512" height="512"></canvas>
             </div>
             <div class="preview-box">
-                <h3>合成後の画像</h3>
-                <canvas id="compositeCanvas" width="500" height="500"></canvas>
+                <h3 class="section-title">合成後の画像</h3>
+                <canvas id="compositeCanvas" width="512" height="512"></canvas>
             </div>
         </div>
         
         <button id="downloadBtn" disabled>合成画像をダウンロード</button>
         
         <div class="instructions">
-            <h3>使い方</h3>
+            <h3 class="section-title">使い方</h3>
             <ol>
                 <li>「ファイルを選択」ボタンをクリックして、Slackのプロフィール画像を選択</li>
                 <li>画像が自動的に合成されます</li>
@@ -96,6 +195,28 @@
                 <li>保存した画像をSlackのプロフィールにアップロード</li>
             </ol>
             <p><strong>注意：</strong> 画像処理はすべてブラウザ上で行われます。画像データはサーバーに送信されません。</p>
+        </div>
+        
+        <div class="slack-instructions">
+            <h3 class="section-title">Slackでプロフィール画像を変更する方法</h3>
+            
+            <h4>デスクトップアプリ/ブラウザ版：</h4>
+            <ol>
+                <li>Slackにログインする</li>
+                <li>画面左上の自分のプロフィール写真（アイコン）をクリック</li>
+                <li>表示されるメニューから「プロフィールを編集」を選択</li>
+                <li>プロフィール編集画面で「プロフィール写真を変更」をクリック</li>
+                <li>先ほどダウンロードした合成画像を選択してアップロード</li>
+            </ol>
+            
+            <h4>モバイルアプリ：</h4>
+            <ol>
+                <li>Slackアプリを開く</li>
+                <li>画面右下の「あなた」タブをタップ</li>
+                <li>プロフィール画面の自分のアイコンをタップ</li>
+                <li>「編集」をタップしてプロフィール設定を開く</li>
+                <li>プロフィール写真を変更し、先ほどダウンロードした合成画像を選択</li>
+            </ol>
         </div>
     </div>
 
