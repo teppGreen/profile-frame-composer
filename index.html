@@ -41,7 +41,7 @@
             text-align: center;
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
-            border-bottom: 3px solid var(--accent-color);
+            border-bottom: 3px solid var(--primary-color);
         }
         
         .container {
@@ -131,26 +131,6 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        .instructions {
-            border-left: 5px solid var(--primary-color);
-        }
-        
-        .slack-instructions {
-            border-left: 5px solid var(--accent-color);
-        }
-        
-        .size-note {
-            font-weight: bold;
-            color: var(--accent-color);
-            margin-top: 15px;
-            font-family: 'Noto Sans JP', sans-serif;
-        }
-        
-        .size-number {
-            font-family: 'Roboto', sans-serif;
-            font-weight: 700;
-        }
-        
         input[type="file"] {
             background-color: var(--white-color);
             padding: 10px;
@@ -159,7 +139,7 @@
         }
         
         .section-title {
-            border-bottom: 2px solid var(--highlight-color);
+            border-bottom: 2px solid var(--primary-color);
             padding-bottom: 5px;
             margin-bottom: 15px;
         }
@@ -201,7 +181,6 @@
             <div class="upload-container">
                 <p>Slackのプロフィール画像をアップロードしてください</p>
                 <input type="file" id="imageUpload" accept="image/*">
-                <p class="size-note">※出力サイズ: <span class="size-number">512×512</span> ピクセル</p>
             </div>
             
             <div class="preview-container">
@@ -221,13 +200,13 @@
                     <li>「合成画像をダウンロード」ボタンをクリックして保存</li>
                     <li>保存した画像をSlackのプロフィールにアップロード</li>
                 </ol>
-                <p><strong>注意：</strong> 画像処理はすべてブラウザ上で行われます。画像データはサーバーに送信されません。</p>
+                <p>※画像処理はすべてブラウザ上で行われます。画像データはサーバーに送信されません。</p>
             </div>
             
             <div class="slack-instructions">
                 <h3 class="section-title">Slackでプロフィール画像を変更する方法</h3>
                 
-                <h4>デスクトップアプリ/ブラウザ版：</h4>
+                <h4>デスクトップアプリ/ブラウザ：</h4>
                 <ol>
                     <li>Slackにログインする</li>
                     <li>画面左上の自分のプロフィール写真（アイコン）をクリック</li>
