@@ -228,72 +228,81 @@
     </div>
 
     <script>
-        // URLパラメータのチェック
-        function checkAccess() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const accessKey = urlParams.get('key');
-            
-            // アクセスキー「frame2024」の場合にのみアクセス許可
-            if (accessKey === 'frame2024') {
-                document.getElementById('app-content').style.display = 'block';
-                document.getElementById('access-denied').style.display = 'none';
-            } else {
-                document.getElementById('app-content').style.display = 'none';
-                document.getElementById('access-denied').style.display = 'block';
-            }
+    function checkAccess() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessKey = urlParams.get('key');
+        
+        if (accessKey === 'b45i8n5eifp7') {
+            document.getElementById('app-content').style.display = 'block';
+            document.getElementById('access-denied').style.display = 'none';
+        } else {
+            document.getElementById('app-content').style.display = 'none';
+            document.getElementById('access-denied').style.display = 'block';
         }
+    }
+    
+    window.onload = checkAccess;
+    
+    let frameImage = new Image();
+    frameImage.src = 'frame.png';
+    
+    const imageUpload = document.getElementById('imageUpload');
+    const compositeCanvas = document.getElementById('compositeCanvas');
+    const downloadBtn = document.getElementById('downloadBtn');
+    
+    const originalCanvas = document.createElement('canvas');
+    originalCanvas.width = 512;
+    originalCanvas.height = 512;
+    
+    const originalCtx = originalCanvas.getContext('2d');
+    const compositeCtx = compositeCanvas.getContext('2d');
+    
+    imageUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
         
-        // ページ読み込み時にアクセスチェック
-        window.onload = checkAccess;
-        
-        // フレーム画像の読み込み
-        let frameImage = new Image();
-        frameImage.src = 'frame.png'; // フレーム画像のパス
-        
-        // キャンバスと入力要素の取得
-        const imageUpload = document.getElementById('imageUpload');
-        const compositeCanvas = document.getElementById('compositeCanvas');
-        const downloadBtn = document.getElementById('downloadBtn');
-        
-        // 元画像のキャンバスは作成するが表示しない
-        const originalCanvas = document.createElement('canvas');
-        originalCanvas.width = 512;
-        originalCanvas.height = 512;
-        
-        const originalCtx = originalCanvas.getContext('2d');
-        const compositeCtx = compositeCanvas.getContext('2d');
-        
-        imageUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    // 元の画像をキャンバスに描画（非表示）
-                    originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
-                    originalCtx.drawImage(img, 0, 0, originalCanvas.width, originalCanvas.height);
-                    
-                    // 合成画像を作成
-                    compositeCtx.clearRect(0, 0, compositeCanvas.width, compositeCanvas.height);
-                    compositeCtx.drawImage(img, 0, 0, compositeCanvas.width, compositeCanvas.height);
-                    compositeCtx.drawImage(frameImage, 0, 0, compositeCanvas.width, compositeCanvas.height);
-                    
-                    // ダウンロードボタンを有効化
-                    downloadBtn.disabled = false;
-                };
-                img.src = event.target.result;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvasSize = 512;
+                const imgRatio = img.width / img.height;
+                const canvasRatio = canvasSize / canvasSize;
+                
+                let drawWidth, drawHeight, offsetX, offsetY;
+                if (imgRatio > canvasRatio) {
+                    drawHeight = canvasSize;
+                    drawWidth = img.width * (canvasSize / img.height);
+                    offsetX = (drawWidth - canvasSize) / 2;
+                    offsetY = 0;
+                } else {
+                    drawWidth = canvasSize;
+                    drawHeight = img.height * (canvasSize / img.width);
+                    offsetX = 0;
+                    offsetY = (drawHeight - canvasSize) / 2;
+                }
+                
+                originalCtx.clearRect(0, 0, canvasSize, canvasSize);
+                originalCtx.drawImage(img, -offsetX, -offsetY, drawWidth, drawHeight);
+                
+                compositeCtx.clearRect(0, 0, canvasSize, canvasSize);
+                compositeCtx.drawImage(originalCanvas, 0, 0, canvasSize, canvasSize);
+                compositeCtx.drawImage(frameImage, 0, 0, canvasSize, canvasSize);
+                
+                downloadBtn.disabled = false;
             };
-            reader.readAsDataURL(file);
-        });
-        
-        downloadBtn.addEventListener('click', function() {
-            const link = document.createElement('a');
-            link.download = 'slack-profile-with-frame.png';
-            link.href = compositeCanvas.toDataURL('image/png');
-            link.click();
-        });
-    </script>
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    downloadBtn.addEventListener('click', function() {
+        const link = document.createElement('a');
+        link.download = 'slack-profile-with-frame.png';
+        link.href = compositeCanvas.toDataURL('image/png');
+        link.click();
+    });
+</script>
+
 </body>
 </html>
